@@ -1,0 +1,75 @@
+
+# ==========================================
+# Node.js / Angular
+# ==========================================
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.angular/
+coverage/
+out-tsc/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Angular / TypeScript
+# ==========================================
+
+*.tsbuildinfo
+
+# ==========================================
+# STM32 / Firmware
+# ==========================================
+
+# Build output
+Debug/
+Release/
+
+# Compiled firmware files
+*.o
+*.obj
+*.elf
+*.hex
+*.bin
+*.map
+*.d
+*.su
+*.cyclo
+
+# STM32CubeIDE local settings
+.metadata/
+.settings/
+
+# ==========================================
+# IDE / Editor
+# ==========================================
+
+.idea/
+.vscode/
+
+# ==========================================
+# Operating system files
+# ==========================================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*~
+*.swp
+*.swo
+*.tmp
