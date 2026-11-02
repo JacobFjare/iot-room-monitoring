@@ -1,0 +1,28 @@
+
+<div [class]="'room-card ' + statusClass()">
+
+  <h2>{{ room().name }}</h2>
+
+  <p>
+    {{
+      statusClass() === 'unknown'
+        ? 'Unknown'
+        : room().occupied ? 'Occupied' : 'Vacant'
+    }}
+  </p>
+
+  <p>
+    Duration:
+    {{ clock.formatDuration(room().stateSince) }}
+  </p>
+
+  @if (room().lastSeenAt) {
+    <small>
+      Last sensor update:
+      {{ clock.formatDuration(room().lastSeenAt) }} ago
+    </small>
+  } @else {
+    <small>No sensor updates received</small>
+  }
+
+</div>

@@ -1,27 +1,26 @@
 
 <main class="dashboard">
+  
 
   <h1>Room Monitoring</h1>
+  @if (roomData.status() !== 'connected') {
+    <p class="connection-warning">
+      @if (roomData.status() === 'connecting') {
+        Connecting to backend...
+      } @else {
+        Connection lost. Showing last known data.
+        Reconnecting automatically...
+      }
+    </p>
+  }
 
   <p>Current room occupancy overview</p>
 
   <div class="rooms">
 
-    @for (room of rooms(); track room.id) {
+    @for (room of rooms(); track room.deviceId) {
 
-      <div class="room-card"
-           [class.occupied]="room.occupied"
-           [class.vacant]="!room.occupied">
-
-        <h2>{{ room.name }}</h2>
-
-        @if (room.occupied) {
-          <p>Occupied</p>
-        } @else {
-          <p>Vacant</p>
-        }
-
-      </div>
+      <app-room-card [room]="room" />
 
     } @empty {
 

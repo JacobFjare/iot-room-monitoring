@@ -37,26 +37,22 @@ function initMQTT() {
     try {
       const data = JSON.parse(message.toString());
 
-      console.log("Received MQTT message:", data);
-
       const deviceId = data.end_device_ids?.device_id;
+      const occupied = data.uplink_message?.decoded_payload?.occupied;
+      const receivedAt = data.received_at;
 
-      const occupied =
-        data.uplink_message?.decoded_payload?.occupied;
-
-      // Ignore messages without a valid occupancy value
       if (
         !deviceId ||
-        typeof occupied !== "boolean"
+        typeof occupied !== "boolean" ||
+        !receivedAt ||
+        Number.isNaN(Date.parse(receivedAt))
       ) {
         return;
       }
 
-      // Update the room state
-      const changed = updateRoom(deviceId, occupied);
+      const updated = updateRoom(deviceId, occupied, receivedAt);
 
-      // Notify Angular when a room changes
-      if (changed) {
+      if (updated) {
         broadcastRooms();
       }
 

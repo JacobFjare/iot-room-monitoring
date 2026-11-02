@@ -16,21 +16,10 @@
   margin-top: 30px;
 }
 
-.room-card {
-  padding: 24px;
-  border-radius: 12px;
-
-  h2 {
-    margin-top: 0;
-  }
-
-  &.occupied {
-    background-color: #fee2e2;
-    border: 2px solid #ef4444;
-  }
-
-  &.vacant {
-    background-color: #dcfce7;
-    border: 2px solid #22c55e;
-  }
+.connection-warning {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fef9c3;
+  color: #854d0e;
+  border: 1px solid #eab308;
 }
