@@ -1,3 +1,4 @@
+// This is intended as a development only script. Never use this in production.
 
 const db = require("../src/database");
 
