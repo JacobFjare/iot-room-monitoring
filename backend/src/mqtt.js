@@ -33,33 +33,49 @@ function initMQTT() {
     });
   });
 
-  client.on("message", (topic, message) => {
-    try {
-      const data = JSON.parse(message.toString());
 
-      const deviceId = data.end_device_ids?.device_id;
-      const occupied = data.uplink_message?.decoded_payload?.occupied;
-      const receivedAt = data.received_at;
+client.on("message", (topic, message) => {
+  try {
+    const data = JSON.parse(message.toString());
 
-      if (
-        !deviceId ||
-        typeof occupied !== "boolean" ||
-        !receivedAt ||
-        Number.isNaN(Date.parse(receivedAt))
-      ) {
-        return;
-      }
+    const nodeId = data.uplink_message?.decoded_payload?.node_id;
+    const occupied = data.uplink_message?.decoded_payload?.occupied;
+    const receivedAt = data.received_at;
 
-      const updated = updateRoom(deviceId, occupied, receivedAt);
-
-      if (updated) {
-        broadcastRooms();
-      }
-
-    } catch (err) {
-      console.error("Failed to process MQTT message:", err);
+    // Validate the incoming data
+    if (
+      !Number.isInteger(nodeId) ||
+      nodeId < 0 ||
+      nodeId > 15 ||
+      typeof occupied !== "boolean" ||
+      !receivedAt ||
+      Number.isNaN(Date.parse(receivedAt))
+    ) {
+      console.log("Invalid MQTT payload");
+      return;
     }
-  });
+
+    // Map the simulated node to a room
+    const deviceId = `room-${100 + nodeId}`;
+    console.log("Received TTN message:", {
+      ttnDeviceId: data.end_device_ids?.device_id,
+      nodeId,
+      deviceId,
+      occupied,
+      receivedAt
+    });
+
+    const updated = updateRoom(deviceId, occupied, receivedAt);
+
+    if (updated) {
+      broadcastRooms();
+    }
+
+  } catch (err) {
+    console.error("Failed to process MQTT message:", err);
+  }
+});
+
 
   client.on("error", (err) => {
     console.error("MQTT error:", err.message);

@@ -30,6 +30,9 @@ db.exec(`
   ON occupancy_sessions(device_id)
   WHERE ended_at IS NULL;
 
+  CREATE INDEX IF NOT EXISTS idx_sessions_device_start
+  ON occupancy_sessions(device_id, started_at);
+
   CREATE TABLE IF NOT EXISTS room_state (
     device_id TEXT PRIMARY KEY,
     occupied INTEGER NOT NULL
