@@ -5,13 +5,14 @@ import {
   inject,
   input
 } from '@angular/core';
-
+import { RouterLink } from '@angular/router';
 import { Room } from '../../models/room';
 import { Clock } from '../../services/clock';
 
 @Component({
   selector: 'app-room-card',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './room-card.html',
   styleUrl: './room-card.scss'
 })

@@ -1,0 +1,58 @@
+
+<main class="room-details">
+
+  <a routerLink="/" class="back-link">
+    ← Back to dashboard
+  </a>
+
+  <h1>{{ daily()?.name ?? roomId() }}</h1>
+  <p>Historical room occupancy statistics</p>
+
+  @if (loading()) {
+
+    <p>Loading statistics...</p>
+
+  } @else if (error()) {
+
+    <p class="error">{{ error() }}</p>
+
+  } @else {
+
+    <section class="chart-panel">
+      <h2>Last 7 days</h2>
+      <p>Total occupied hours per day</p>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="dailyChartData()"
+          [options]="dailyOptions"
+          [type]="'bar'">
+        </canvas>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <h2>Average day this month</h2>
+      <p>
+        Average occupied minutes per hour,
+        across {{ monthly()?.daysIncluded }} completed days
+      </p>
+
+      @if (monthly()?.daysIncluded === 0) {
+        <p>Not enough data for a monthly average yet.</p>
+      } @else {
+        <div class="chart-container">
+          <canvas
+            baseChart
+            [data]="monthlyChartData()"
+            [options]="monthlyOptions"
+            [type]="'bar'">
+          </canvas>
+        </div>
+      }
+    </section>
+
+  }
+
+</main>

@@ -1,5 +1,7 @@
 
-<div [class]="'room-card ' + statusClass()">
+<a  
+  [routerLink]="['/rooms', room().deviceId]"
+  [class]="'room-card ' + statusClass()">
 
   <h2>{{ room().name }}</h2>
 
@@ -25,4 +27,4 @@
     <small>No sensor updates received</small>
   }
 
-</div>
+</a>

@@ -1,23 +1,11 @@
-
-import {
-  Component,
-  inject
-} from '@angular/core';
-
-import { RoomData } from './services/room';
-
-import {
-  RoomCard
-} from './components/room-card/room-card';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RoomCard],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
-  readonly roomData = inject(RoomData);
-  readonly rooms = this.roomData.rooms;
-}
+export class App {}
