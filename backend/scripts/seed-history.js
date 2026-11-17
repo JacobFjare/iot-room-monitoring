@@ -8,7 +8,7 @@ const DAYS = 60;
 // Times are in local Danish time:
 // [startHour, startMinute, endHour, endMinute]
 const schedules = {
-  "room-101": {
+  "1": {
     weekday: [
       [8, 30, 10, 15],
       [11, 0, 12, 30],
@@ -19,7 +19,7 @@ const schedules = {
     ]
   },
 
-  "room-102": {
+  "2": {
     weekday: [
       [9, 0, 11, 30],
       [12, 45, 15, 15]
@@ -27,7 +27,7 @@ const schedules = {
     weekend: []
   },
 
-  "room-103": {
+  "3": {
     weekday: [
       [8, 45, 10, 0],
       [10, 45, 13, 0],
@@ -75,7 +75,7 @@ const seedHistory = db.transaction(() => {
       day.getDay() === 0 || day.getDay() === 6;
 
     Object.entries(schedules).forEach(
-      ([deviceId, schedule], roomIndex) => {
+      ([roomId, schedule], roomIndex) => {
 
         const sessions = isWeekend
           ? schedule.weekend
@@ -115,7 +115,7 @@ const seedHistory = db.transaction(() => {
           const endedAt = end.toISOString();
 
           const overlap = findOverlap.get(
-            deviceId,
+            roomId,
             endedAt,
             startedAt
           );
@@ -126,7 +126,7 @@ const seedHistory = db.transaction(() => {
           }
 
           insertSession.run(
-            deviceId,
+            roomId,
             startedAt,
             endedAt
           );

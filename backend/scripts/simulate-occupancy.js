@@ -2,7 +2,8 @@
 const { updateRoom, getRooms } = require("../src/rooms");
 const db = require("../src/database");
 
-const deviceId = "room-101";
+// Optional room ID argument, e.g. node scripts/simulate-occupancy.js 2
+const roomId = process.argv[2] ?? "1";
 const now = Date.now();
 
 // Simulate readings at different times
@@ -20,7 +21,7 @@ for (const reading of readings) {
   ).toISOString();
 
   const accepted = updateRoom(
-    deviceId,
+    roomId,
     reading.occupied,
     timestamp
   );
@@ -39,8 +40,8 @@ console.table(
     FROM occupancy_sessions
     WHERE device_id = ?
     ORDER BY started_at
-  `).all(deviceId)
+  `).all(roomId)
 );
 
 console.log("\nCurrent room state:");
-console.log(getRooms().find(r => r.deviceId === deviceId));
+console.log(getRooms().find(r => r.deviceId === roomId));

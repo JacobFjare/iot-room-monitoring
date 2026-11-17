@@ -48,11 +48,12 @@ const getRecordedRooms = db.prepare(`
   ORDER BY rooms.device_id
 `);
 
-// Returns rooms in the format Angular expects
+// Keep deviceId in the public payload for frontend compatibility.
+// Its value identifies the room, not the physical TTN device.
 function getRooms() {
   return getRecordedRooms.all().map(room => ({
     deviceId: room.device_id,
-    name: `Room ${room.device_id.slice("room-".length)}`,
+    name: `Room ${room.device_id}`,
     occupied: room.occupied === null ? null : Boolean(room.occupied),
     stateSince: room.state_since,
     lastSeenAt: room.last_seen_at
@@ -61,9 +62,9 @@ function getRooms() {
 
 // A transaction keeps state and sessions consistent
 const saveReading = db.transaction(
-  (deviceId, occupied, timestamp) => {
+  (roomId, occupied, timestamp) => {
 
-    const previous = getState.get(deviceId);
+    const previous = getState.get(roomId);
 
     // Ignore duplicate and older readings
     if (
@@ -81,18 +82,18 @@ const saveReading = db.transaction(
 
       // Occupied -> Vacant
       if (previous?.occupied === 1 && !occupied) {
-        const result = endSession.run(timestamp, deviceId);
+        const result = endSession.run(timestamp, roomId);
 
         if (result.changes !== 1) {
           throw new Error(
-            `No open occupancy session for ${deviceId}`
+            `No open occupancy session for ${roomId}`
           );
         }
       }
 
       // Vacant -> Occupied (or first occupied reading)
       if (occupied) {
-        startSession.run(deviceId, timestamp);
+        startSession.run(roomId, timestamp);
       }
     }
 
@@ -103,7 +104,7 @@ const saveReading = db.transaction(
 
     // Always record the newest sensor update
     saveState.run(
-      deviceId,
+      roomId,
       occupied ? 1 : 0,
       stateSince,
       timestamp
@@ -113,15 +114,14 @@ const saveReading = db.transaction(
   }
 );
 
-function updateRoom(deviceId, occupied, receivedAt) {
+function updateRoom(roomId, occupied, receivedAt) {
 
-  // Nodes 0–15 map to rooms 100–115; new rooms need not exist yet.
+  // Room IDs are strings; simulator-specific node validation belongs in MQTT.
   if (
-    typeof deviceId !== "string" ||
-    deviceId.length !== 8 ||
-    !/^room-(10[0-9]|11[0-5])$/.test(deviceId)
+    typeof roomId !== "string" ||
+    roomId.trim().length === 0
   ) {
-    console.log("Invalid device:", deviceId);
+    console.log("Invalid room ID:", roomId);
     return false;
   }
 
@@ -140,7 +140,7 @@ function updateRoom(deviceId, occupied, receivedAt) {
 
   const timestamp = new Date(milliseconds).toISOString();
 
-  return saveReading(deviceId, occupied, timestamp);
+  return saveReading(roomId, occupied, timestamp);
 }
 
 module.exports = {

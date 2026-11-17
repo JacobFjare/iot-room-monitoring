@@ -56,16 +56,16 @@ client.on("message", (topic, message) => {
     }
 
     // Map the simulated node to a room
-    const deviceId = `room-${100 + nodeId}`;
+    const roomId = String(nodeId);
     console.log("Received TTN message:", {
       ttnDeviceId: data.end_device_ids?.device_id,
       nodeId,
-      deviceId,
+      roomId,
       occupied,
       receivedAt
     });
 
-    const updated = updateRoom(deviceId, occupied, receivedAt);
+    const updated = updateRoom(roomId, occupied, receivedAt);
 
     if (updated) {
       broadcastRooms();
