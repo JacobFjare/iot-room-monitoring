@@ -1,17 +1,6 @@
 
 const db = require("./database");
 
-// Known devices and their display names
-const knownRooms = [
-  { deviceId: "room-101", name: "Room 101" },
-  { deviceId: "room-102", name: "Room 102" },
-  { deviceId: "room-103", name: "Room 103" }
-];
-
-const knownDeviceIds = new Set(
-  knownRooms.map(room => room.deviceId)
-);
-
 // Prepared SQL statements
 const getState = db.prepare(`
   SELECT *
@@ -43,29 +32,31 @@ const saveState = db.prepare(`
     last_seen_at = excluded.last_seen_at
 `);
 
-const getAllStates = db.prepare(`
-  SELECT *
-  FROM room_state
+const getRecordedRooms = db.prepare(`
+  SELECT
+    rooms.device_id,
+    state.occupied,
+    state.state_since,
+    state.last_seen_at
+  FROM (
+    SELECT device_id FROM room_state
+    UNION
+    SELECT device_id FROM occupancy_sessions
+  ) AS rooms
+  LEFT JOIN room_state AS state
+    ON state.device_id = rooms.device_id
+  ORDER BY rooms.device_id
 `);
 
 // Returns rooms in the format Angular expects
 function getRooms() {
-  const states = getAllStates.all();
-
-  const stateById = new Map(
-    states.map(state => [state.device_id, state])
-  );
-
-  return knownRooms.map(room => {
-    const state = stateById.get(room.deviceId);
-
-    return {
-      ...room,
-      occupied: state ? Boolean(state.occupied) : null,
-      stateSince: state?.state_since ?? null,
-      lastSeenAt: state?.last_seen_at ?? null
-    };
-  });
+  return getRecordedRooms.all().map(room => ({
+    deviceId: room.device_id,
+    name: `Room ${room.device_id.slice("room-".length)}`,
+    occupied: room.occupied === null ? null : Boolean(room.occupied),
+    stateSince: room.state_since,
+    lastSeenAt: room.last_seen_at
+  }));
 }
 
 // A transaction keeps state and sessions consistent
@@ -124,8 +115,13 @@ const saveReading = db.transaction(
 
 function updateRoom(deviceId, occupied, receivedAt) {
 
-  if (!knownDeviceIds.has(deviceId)) {
-    console.log("Unknown device:", deviceId);
+  // Nodes 0–15 map to rooms 100–115; new rooms need not exist yet.
+  if (
+    typeof deviceId !== "string" ||
+    deviceId.length !== 8 ||
+    !/^room-(10[0-9]|11[0-5])$/.test(deviceId)
+  ) {
+    console.log("Invalid device:", deviceId);
     return false;
   }
 
