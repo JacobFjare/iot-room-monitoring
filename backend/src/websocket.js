@@ -14,6 +14,11 @@ function initWebSocket(httpServer) {
   wss.on("connection", (socket) => {
     console.log("Dashboard connected!");
 
+    socket.on("error", (error) => {
+      console.error("Dashboard WebSocket error:", error.message);
+      socket.terminate();
+    });
+
     // Send the current room states immediately
     socket.send(JSON.stringify(getRooms()));
 
